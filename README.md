@@ -33,7 +33,8 @@ A MOSFET's operation is divided into three regions, governed by the voltages app
     The channel is "pinched off" near the drain. The current becomes largely independent of $V_{ds}$ and is primarily controlled by $V_{gs}$, making the transistor act like a voltage-controlled current source.
     $$I_{ds} = \frac{1}{2} \mu_n C_{ox} \frac{W}{L} (V_{gs} - V_{th})^2$$
 
-
+![V-I characterisrics of a long channel MOSFET](week4_img/v_vs_i_different_vgs.png)
+*.*
 
 ### 📈 Observations and Trends
 * **Family of Curves:** The plot displays a distinct curve for each value of $V_{gs}$. As $V_{gs}$ increases, the transistor is turned on "harder," allowing significantly more current to flow.
