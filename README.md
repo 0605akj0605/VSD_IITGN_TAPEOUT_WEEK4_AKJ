@@ -75,6 +75,9 @@ The VTC is divided into five distinct regions of operation, corresponding to the
     * **N:** Triode | **P:** Cut-off
     * The PMOS is now off. The NMOS is fully on, acting like a low-resistance path from the output to ground.
     * **Result:** $V_{out} = V_{OL} = 0V$ (GND).
+ 
+![VTC characteristics of CMOS invertor](./week4_img/normal_I_vs_V_vth_calculation.png)
+*VTC characteristics of CMOS invertor*
 
 ### 📈 Observations and Trends
 * The VTC for a well-designed inverter shows a very sharp transition between the high and low states, which is essential for regenerating logic levels and providing noise immunity.
@@ -94,8 +97,44 @@ Noise margins are defined based on the "unity gain points" of the VTC, which are
 The noise margins are then calculated as:
 * **Low Noise Margin ($NM_L$):** The amount of noise that can be added to a '0' input before it's no longer recognized as low.
     $$NM_L = V_{IL} - V_{OL}$$
+  Here,
+   NM(LOW)  = 1.79545 - 1.725
+            = 0.07045 or 70.45m## Noise Margin Calculation
+
+The noise margin is a critical parameter that determines a circuit's tolerance to noise. It's the amount of noise voltage a logic circuit can withstand without changing its output state.
+
+---
+
+### Low Noise Margin ($NM_L$)
+This is the amount of noise that can be added to a 'low' input signal before the logic gate no longer recognizes it as a valid low input.
+
+The formula is:
+$$NM_L = V_{IL} - V_{OL}$$
+
+![NM(LOW) Calculation](week4_img/NMH.png)
+
+**Calculation:**
+> $NM_L = 1.79545V - 1.725V = 0.07045V$ or $70.45mV$
+
+---
+
+### High Noise Margin ($NM_H$)
+This is the amount of noise that can be subtracted from a 'high' input signal before the logic gate no longer recognizes it as a valid high input.
+
+The formula is:
+$$NM_H = V_{OH} - V_{IH}$$
+
+![NM(HIGH) Calculation](week4_img/NML.png)
+
+**Calculation:**
+> $NM_H = 0.083125V - 0.00125V = 0.081875V$ or $81.875mV$
+   
 * **High Noise Margin ($NM_H$):** The amount of noise that can be subtracted from a '1' input before it's no longer recognized as high.
     $$NM_H = V_{OH} - V_{IH}$$
+  Here,
+   NM(HIGH) = 0.083125 - 0.00125
+            = 0.081875V or 80mV
+
 
 ### 📈 Observations and Trends
 * For a robust circuit, we desire **large and equal** noise margins. This provides the best protection against both positive noise spikes on low signals and negative noise spikes (ground bounce) on high signals.
@@ -129,6 +168,9 @@ The speed of an inverter is typically measured by its rise and fall times.
 * **Rise Time ($t_r$ or $t_{pLH}$):** The time for the output to go from Low to High (e.g., 10% to 90% of $V_{DD}$). This is governed by the **PMOS transistor** charging $C_L$ from $V_{DD}$. A stronger PMOS (larger W) has a lower effective resistance ($R_p$) and can charge the capacitor faster.
     $$t_{pLH} \propto R_p C_L$$
 
+![Impact of Device Sizing (W/L) on Transient Response: Rise and Fall Dynamics](./week4_img/w_L_p_W_L_n.png)
+*Impact of Device Sizing (W/L) on Transient Response: Rise and Fall Dynamics*
+
 ### 📈 Observations and Trends
 * **Increasing $(W/L)_n$** makes the NMOS stronger, **decreasing the fall time** ($t_{pHL}$) with minimal impact on the rise time.
 * **Increasing $(W/L)_p$** makes the PMOS stronger, **decreasing the rise time** ($t_{pLH}$) with minimal impact on the fall time.
@@ -147,8 +189,71 @@ The relationship between supply voltage, speed, and power is fundamental:
         $$P_{dynamic} = \alpha C_L V_{DD}^2 f$$
         where $\alpha$ is the activity factor and $f$ is the switching frequency. Doubling $V_{DD}$ quadruples the dynamic power!
     * **Static Power:** This is power consumed by leakage currents when the circuit is idle. Higher $V_{DD}$ can also increase leakage, contributing to static power draw.
+ 
+
+![ Impact of Supply Voltage ($V_{DD}$) Variation: The Speed vs. Power Trade-Off](./week4_img/supply_voltage_char.png)
+*Impact of Supply Voltage ($V_{DD}$) Variation*
 
 ### 📈 Observations and Trends
 * **Higher $V_{DD}$:** The I-V curves will show significantly higher drive currents. The VTC will be "taller" with wider noise margins. The transient response will be much faster. The trade-off is a dramatic increase in power consumption.
 * **Lower $V_{DD}$:** Drive currents are reduced, leading to slower switching speeds. The VTC is "squashed," and noise margins shrink, making the circuit more susceptible to noise. The major benefit is a substantial reduction in power consumption, which is critical for mobile and battery-powered devices.
 * This simulation highlights the **central trade-off in digital design**: designers must constantly balance the demand for high performance (requiring higher $V_{DD}$) against the need for low power consumption (requiring lower $V_{DD}$).
+
+---
+## 📈 Understanding Device Variation
+
+In semiconductor manufacturing, it is impossible to create perfectly identical transistors across a silicon wafer. These minor physical differences, known as **device variation**, lead to variations in electrical properties. Understanding these variations is crucial for designing robust and reliable circuits.
+
+Two primary sources of this variation are process differences and material non-uniformities.
+
+---
+
+### 1. Process Variation: Center vs. Edge
+
+During the fabrication process, particularly in steps like **etching** and deposition, conditions are not perfectly uniform across the entire wafer.
+
+* **Cause**: The plasma or chemical reactants used for etching may have slightly different concentrations or temperatures at the center of the wafer compared to the edges.
+* **Effect**: This non-uniformity means that the physical dimensions of a MOSFET, such as its gate length ($L$) and width ($W$), will be slightly different depending on its location on the die. Transistors at the center might be etched faster or slower than those at the periphery.
+* **Impact**: Since a MOSFET's performance is highly dependent on its $W/L$ ratio, these microscopic dimensional changes directly alter its current drive and switching speed, leading to performance variation across the chip.
+
+---
+
+### 2. Oxide Thickness ($t_{ox}$) Variation
+
+The gate oxide is an extremely thin layer of insulating material (like $SiO_2$) that is critical to the MOSFET's operation. Even minor variations in its thickness ($t_{ox}$) can significantly impact device behavior.
+
+#### A. Impact on Drain Current ($I_D$)
+
+The drain current determines the transistor's switching speed and drive strength. The relationship is clearly seen in the saturation-region current equation:
+
+$$I_D = \frac{1}{2} \mu_n C_{ox} \frac{W}{L} (V_{GS} - V_{th})^2$$
+
+The key term here is the gate oxide capacitance per unit area, **$C_{ox}$**, which is defined as:
+
+$$C_{ox} = \frac{\epsilon_{ox}}{t_{ox}}$$
+
+By substituting this into the drain current equation, the direct link becomes clear:
+
+$$I_D = \frac{1}{2} \mu_n \left( \frac{\epsilon_{ox}}{t_{ox}} \right) \frac{W}{L} (V_{GS} - V_{th})^2$$
+
+> **Conclusion**: The drain current ($I_D$) is **inversely proportional** to the gate oxide thickness ($t_{ox}$).
+> * A spot with a **thinner** oxide will have a higher $C_{ox}$, resulting in a **higher** drive current and a faster transistor.
+> * A spot with a **thicker** oxide will have a lower $C_{ox}$, leading to a **lower** drive current and a slower transistor.
+
+#### B. Robustness of Threshold Voltage ($V_{th}$)
+
+The threshold voltage ($V_{th}$) is the minimum gate voltage required to turn the transistor "ON". Its stability is vital for predictable circuit operation. Unfortunately, $V_{th}$ is also sensitive to oxide thickness.
+
+The threshold voltage equation includes a term dependent on $C_{ox}$:
+
+$$V_{th} = V_{FB} + 2\phi_F + \frac{\sqrt{2\epsilon_{si}qN_A(2\phi_F)}}{C_{ox}}$$
+
+Substituting the formula for $C_{ox}$ shows that $V_{th}$ has a **direct linear relationship** with $t_{ox}$:
+
+$$V_{th} = V_{FB} + 2\phi_F + \left( \frac{\sqrt{2\epsilon_{si}qN_A(2\phi_F)}}{\epsilon_{ox}} \right) t_{ox}$$
+
+> **Conclusion**: A circuit's robustness against these defects is a measure of how well it performs despite these variations.
+> * An unintended **increase** in $t_{ox}$ will **increase** $V_{th}$. This makes the transistor harder to turn on, slowing down the circuit.
+> * An unintended **decrease** in $t_{ox}$ will **decrease** $V_{th}$. This makes the transistor easier to turn on, which can increase static power consumption due to subthreshold leakage current.
+>
+> Therefore, non-uniformity in oxide thickness directly degrades the robustness of the circuit by creating a spread of threshold voltages across the chip, impacting timing, power, and overall yield.
